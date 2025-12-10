@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Smart Study Planner — Dark Neo UI</title>
+  <style>
+    /* Dark Cyber / Neo UI — single-file CSS */
+    :root{
+      --bg:#071029;
+      --card:#0b1726;
+      --muted:#9aa9c8;
+      --accent:#00e6ff;
+      --accent-2:#7c1cff;
+      --glass: rgba(255,255,255,0.03);
+      --glass-2: rgba(255,255,255,0.02);
+      --glass-border: rgba(0,230,255,0.08);
+      --success:#2ade7a;
+      --danger:#ff4d6d;
+      --glass-shadow: 0 6px 30px rgba(0,0,0,0.6);
+      --glass-glow: 0 0 18px rgba(0,230,255,0.06);
+      --radius:14px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background: radial-gradient(1200px 500px at 10% 10%, rgba(124,28,255,0.08), transparent),
+                  radial-gradient(800px 400px at 90% 90%, rgba(0,230,255,0.03), transparent),
+                  var(--bg);
+      color:#d8e9ff;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding:24px;
+    }
+    header{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      margin-bottom:18px;
+    }
+    .brand{
+      display:flex;align-items:center;gap:12px
+    }
+    .logo{
+      width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent-2));
+      box-shadow: 0 8px 30px rgba(124,28,255,0.12), 0 0 40px rgba(0,230,255,0.06);
+      display:grid;place-items:center;font-weight:700;color:#041226;font-size:18px;
+    }
+    h1{font-size:20px;margin:0}
+    p.lead{color:var(--muted);margin:0;font-size:13px}
+
+    /* Layout grid */
+    .grid{
+      display:grid;gap:18px;
+      grid-template-columns: 420px 1fr 360px;
+    }
+    @media (max-width:1100px){.grid{grid-template-columns: 1fr;}}
+
+    /* Card */
+    .card{
+      background: linear-gradient(180deg,var(--card), rgba(255,255,255,0.02));
+      border-radius:var(--radius); padding:16px; box-shadow:var(--glass-shadow);
+      border:1px solid var(--glass-border);
+      backdrop-filter: blur(8px) saturate(120%);
+      position:relative; overflow:hidden;
+    }
+
+    /* Neon accent glow on cards */
+    .card::after{
+      content:"";position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;opacity:0.06
+    }
+
+    .controls{display:flex;gap:8px;align-items:center}
+    input[type=text], input[type=number], select{
+      background:transparent;border:1px dashed rgba(255,255,255,0.04);padding:8px 10px;border-radius:10px;color:inherit;outline:none;
+    }
+    .btn{background:linear-gradient(90deg,var(--accent),var(--accent-2));padding:10px 12px;border-radius:10px;border:none;color:#02101a;cursor:pointer;font-weight:600}
+    .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
+
+    /* Subject list */
+    #subjectList{list-style:none;padding:0;margin:12px 0;display:flex;flex-direction:column;gap:10px;}
+    .subject-item{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.015),transparent);border:1px solid rgba(255,255,255,0.02)}
+    .subject-meta{display:flex;gap:10px;align-items:center}
+    .chip{padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.02);font-size:13px;color:var(--muted)}
+    .drag-handle{cursor:grab;padding:6px;border-radius:8px}
+
+    /* Calendar */
+    #calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+    .day{min-height:100px;padding:8px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border:1px solid rgba(255,255,255,0.02)}
+    .day h4{margin:0;margin-bottom:6px;font-size:13px;color:var(--muted)}
+    .task-block{padding:8px;margin-bottom:6px;border-radius:8px;background:linear-gradient(90deg, rgba(0,230,255,0.06), rgba(124,28,255,0.04));color:#041226;font-weight:600;cursor:grab}
+
+    /* Progress & charts */
+    .chart{width:100%;height:180px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent);display:grid;place-items:center}
+    .small{height:120px}
+
+    /* Timer */
+    .timer{display:flex;flex-direction:column;align-items:center;gap:8px}
+    .time-display{font-size:36px;font-weight:700;background:linear-gradient(90deg,#021827, rgba(255,255,255,0.02));padding:12px 18px;border-radius:12px}
+
+    /* Footer small */
+    .muted{color:var(--muted);font-size:13px}
+
+    /* export import area */
+    .file-row{display:flex;gap:8px;align-items:center}
+
+    /* micro animations */
+    .glow{box-shadow: 0 6px 40px rgba(124,28,255,0.08), 0 0 40px rgba(0,230,255,0.06)}
+
+    /* responsive calendar stack on mobile */
+    @media (max-width:1100px){#calendar{grid-template-columns:repeat(3,1fr)}}
+    @media (max-width:640px){#calendar{grid-template-columns:repeat(2,1fr)}}
+
+    /* tiny helpers */
+    .flex{display:flex;gap:8px;align-items:center}
+    .col{display:flex;flex-direction:column}
+
+    /* input subtle focus */
+    input:focus, select:focus, button:focus{outline:2px solid rgba(0,230,255,0.06);}
+
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo">SS</div>
+      <div>
+        <h1>Smart Study Planner — Dark Neo</h1>
+        <p class="lead">Neon dashboard with AI suggestions · Pomodoro · Drag & Drop · Export/Import</p>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="btn" id="notifyBtn">Enable Notifications</button>
+      <button class="btn ghost" id="exportBtn">Export JSON</button>
+      <input type="file" id="importFile" style="display:none" accept="application/json">
+      <button class="btn ghost" id="importBtn">Import JSON</button>
+    </div>
+  </header>
+
+  <main class="grid">
+    <!-- LEFT: Subject manager + AI suggestions -->
+    <section class="card">
+      <h3>Add Subject</h3>
+      <div class="flex" style="margin-top:10px">
+        <input id="subjectInput" type="text" placeholder="Subject name">
+        <input id="hoursInput" type="number" min="1" placeholder="Hours" style="width:88px">
+        <select id="diffInput" title="Difficulty">
+          <option value="1">Easy</option>
+          <option value="2" selected>Moderate</option>
+          <option value="3">Hard</option>
+        </select>
+        <button class="btn" id="addBtn">Add</button>
+      </div>
+
+      <ul id="subjectList"></ul>
+
+      <hr style="opacity:0.06;margin:12px 0">
+      <h3>AI Study Suggestions</h3>
+      <div id="aiSuggestions" class="muted" style="margin-top:10px">Add subjects and click "Suggest Plan" to get instant suggestions.</div>
+      <div style="margin-top:12px" class="flex">
+        <button class="btn" id="suggestBtn">Suggest Plan</button>
+        <button class="btn ghost" id="clearAll">Clear All</button>
+      </div>
+    </section>
+
+    <!-- CENTER: Weekly Calendar + Charts -->
+    <section class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h3>Weekly Calendar</h3>
+        <div class="muted">Drag subject → drop into a day to schedule</div>
+      </div>
+
+      <div id="calendar" style="margin-top:12px"></div>
+
+      <div style="display:flex;gap:12px;margin-top:14px">
+        <div style="flex:1">
+          <div class="chart" id="pieContainer"><canvas id="pieChart" width="300" height="180"></canvas></div>
+        </div>
+        <div style="width:300px">
+          <div class="chart small" id="barContainer"><canvas id="barChart" width="300" height="120"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT: Progress + Timer + Export -->
+    <aside class="card col">
+      <h3>Progress</h3>
+      <div style="margin-top:10px">
+        <div class="muted">Total Subjects: <span id="totalSub">0</span></div>
+        <div class="muted">Total Hours: <span id="totalHours">0</span></div>
+        <div style="height:12px;background:rgba(255,255,255,0.03);border-radius:8px;overflow:hidden;margin-top:10px">
+          <div id="fill" style="height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));width:0%"></div>
+        </div>
+      </div>
+
+      <hr style="opacity:0.06;margin:14px 0">
+
+      <h3>Pomodoro</h3>
+      <div class="timer" style="margin-top:8px">
+        <div class="time-display" id="timeDisplay">25:00</div>
+        <div class="flex" style="margin-top:6px">
+          <input type="number" id="workMin" value="25" min="1" style="width:78px">
+          <input type="number" id="shortMin" value="5" min="1" style="width:78px">
+          <input type="number" id="longMin" value="15" min="1" style="width:78px">
+        </div>
+        <div class="flex" style="margin-top:8px">
+          <button class="btn" id="startTimer">Start</button>
+          <button class="btn ghost" id="pauseTimer">Pause</button>
+          <button class="btn ghost" id="resetTimer">Reset</button>
+        </div>
+        <div class="muted" style="margin-top:8px">Cycle: <span id="cycleInfo">Work</span></div>
+      </div>
+
+      <hr style="opacity:0.06;margin:14px 0">
+      <h3>Save / Load</h3>
+      <div class="file-row">
+        <button class="btn" id="saveLocal">Save to Local</button>
+        <button class="btn ghost" id="loadLocal">Load from Local</button>
+      </div>
+      <div style="margin-top:10px" class="muted">Exported file can be imported to restore your planner.</div>
+    </aside>
+  </main>
+
+  <script>
+    /* ======= App State ======= */
+    const state = {
+      subjects: JSON.parse(localStorage.getItem('ss_subjects')||'[]'),
+      calendar: JSON.parse(localStorage.getItem('ss_calendar')||'{}'),
+      timer: {mode:'work',timeLeft:25*60,interval:null,cycleCount:0,running:false}
+    };
+
+    /* ======= Utilities ======= */
+    function saveAll(){
+      localStorage.setItem('ss_subjects', JSON.stringify(state.subjects));
+      localStorage.setItem('ss_calendar', JSON.stringify(state.calendar));
+    }
+
+    /* ======= Subjects UI ======= */
+    const subjectList = document.getElementById('subjectList');
+    function renderSubjects(){
+      subjectList.innerHTML='';
+      state.subjects.forEach((s,i)=>{
+        const li=document.createElement('li');li.className='subject-item';li.draggable=true;li.id='sub-'+i;
+        li.innerHTML = `<div class="subject-meta"><div class="drag-handle">☰</div><div>
+            <div style="font-weight:700">${escapeHTML(s.name)}</div>
+            <div class="chip">${s.hours} hrs • ${difficultyLabel(s.diff)}</div>
+          </div></div>
+          <div class="flex"><button class="btn ghost" onclick="removeSubject(${i})">Delete</button></div>`;
+        li.addEventListener('dragstart',ev=>{ev.dataTransfer.setData('text/plain','subject:'+i);});
+        subjectList.appendChild(li);
+      });
+      document.getElementById('totalSub').innerText = state.subjects.length;
+      document.getElementById('totalHours').innerText = totalHours();
+      updateProgressBar();
+      drawCharts();
+    }
+    function difficultyLabel(d){return d==1? 'Easy': d==2? 'Moderate':'Hard'}
+    function totalHours(){return state.subjects.reduce((a,b)=>a+Number(b.hours),0)}
+
+    function removeSubject(i){state.subjects.splice(i,1);saveAll();renderSubjects();}
+
+    document.getElementById('addBtn').addEventListener('click',()=>{
+      const name=document.getElementById('subjectInput').value.trim();
+      const hours=Number(document.getElementById('hoursInput').value);
+      const diff=Number(document.getElementById('diffInput').value);
+      if(!name || !hours) return alert('Fill name and hours');
+      state.subjects.push({name,hours,diff});
+      document.getElementById('subjectInput').value='';document.getElementById('hoursInput').value='';
+      saveAll();renderSubjects();
+    });
+
+    document.getElementById('clearAll').addEventListener('click',()=>{ if(confirm('Clear all data?')){state.subjects=[];state.calendar={};saveAll();renderSubjects();renderCalendar();drawCharts();}})
+
+    function escapeHTML(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+    /* ======= Calendar ======= */
+    const days=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+    const calRoot=document.getElementById('calendar');
+    function renderCalendar(){
+      calRoot.innerHTML='';
+      days.forEach(d=>{
+        const div=document.createElement('div');div.className='day';div.dataset.day=d;
+        div.innerHTML=`<h4>${d}</h4>`;
+        div.addEventListener('dragover',e=>e.preventDefault());
+        div.addEventListener('drop',e=>{
+          e.preventDefault();
+          const data=e.dataTransfer.getData('text/plain');
+          if(data.startsWith('subject:')){
+            const idx=Number(data.split(':')[1]);
+            scheduleSubjectToDay(idx,d);
+          } else if(data.startsWith('task:')){
+            const payload = JSON.parse(data.slice(5));
+            // moving task between days
+            moveTask(payload.fromDay, d, payload.taskIndex);
+          }
+        });
+
+        const tasks = state.calendar[d]||[];
+        tasks.forEach((t,ti)=>{
+          const tb=document.createElement('div');tb.className='task-block';tb.draggable=true;
+          tb.innerText = t.name + ' · ' + t.hours + 'h';
+          tb.addEventListener('dragstart',ev=>{
+            ev.dataTransfer.setData('text/plain','task:'+JSON.stringify({fromDay:d,taskIndex:ti}));
+          });
+          const del=document.createElement('button');del.className='btn ghost';del.style.marginLeft='8px';del.innerText='×';del.onclick=()=>{ if(confirm('Remove this task?')){state.calendar[d].splice(ti,1);saveAll();renderCalendar();drawCharts();}};
+          tb.appendChild(del);
+          div.appendChild(tb);
+        });
+
+        calRoot.appendChild(div);
+      });
+    }
+
+    function scheduleSubjectToDay(subjectIndex, day){
+      const s = state.subjects[subjectIndex];
+      if(!s) return alert('Subject not found');
+      if(!state.calendar[day]) state.calendar[day]=[];
+      // default: split hours into 1-2h blocks for each subject
+      const h = Math.max(1, Math.min(4, Math.round(s.hours)));
+      state.calendar[day].push({name:s.name,hours:h,diff:s.diff});
+      saveAll();renderCalendar();drawCharts();
+    }
+
+    function moveTask(from, to, index){
+      if(!state.calendar[from] || !state.calendar[from][index]) return;
+      const item = state.calendar[from].splice(index,1)[0];
+      if(!state.calendar[to]) state.calendar[to]=[];
+      state.calendar[to].push(item);
+      saveAll();renderCalendar();drawCharts();
+    }
+
+    /* ======= Charts (Canvas) ======= */
+    const pie = document.getElementById('pieChart');
+    const bar = document.getElementById('barChart');
+    function drawCharts(){
+      drawPie(); drawBar();
+    }
+    function drawPie(){
+      const ctx = pie.getContext('2d'); ctx.clearRect(0,0,pie.width,pie.height);
+      const total = totalHours(); if(total===0) { ctx.fillStyle='rgba(255,255,255,0.03)'; ctx.font='14px Inter'; ctx.fillText('No data',120,90); return; }
+      const data = {};
+      state.subjects.forEach(s=> data[s.name]=(data[s.name]||0)+Number(s.hours));
+      const keys = Object.keys(data);
+      let start= -0.5*Math.PI; let i=0;
+      keys.forEach(k=>{
+        const val = data[k]; const angle = (val/total)*Math.PI*2;
+        ctx.beginPath(); ctx.moveTo(150,90); ctx.arc(150,90,70,start,start+angle); ctx.closePath();
+        const grad = ctx.createLinearGradient(0,0,300,0);
+        grad.addColorStop(0, i%2? 'rgba(0,230,255,0.6)':'rgba(124,28,255,0.6)');
+        grad.addColorStop(1, i%2? 'rgba(124,28,255,0.3)':'rgba(0,230,255,0.3)');
+        ctx.fillStyle=grad; ctx.fill();
+        start += angle; i++;
+      });
+    }
+    function drawBar(){
+      const ctx = bar.getContext('2d'); ctx.clearRect(0,0,bar.width,bar.height);
+      const data = state.subjects.map(s=>({name:s.name,val:Number(s.hours)}));
+      if(data.length===0){ ctx.fillStyle='rgba(255,255,255,0.03)'; ctx.font='12px Inter'; ctx.fillText('No data',120,60); return; }
+      const max = Math.max(...data.map(d=>d.val));
+      const w = bar.width; const h = bar.height; const barW = Math.min(36, Math.floor(w / data.length) - 8);
+      data.forEach((d,i)=>{
+        const x = 8 + i*(barW+8);
+        const height = Math.max(4, Math.floor((d.val/max)*(h-20)));
+        const y = h - height - 10;
+        const grad = ctx.createLinearGradient(x,y,x,y+height);
+        grad.addColorStop(0,'rgba(0,230,255,0.8)'); grad.addColorStop(1,'rgba(124,28,255,0.6)');
+        ctx.fillStyle=grad; ctx.fillRect(x,y,barW,height);
+        ctx.fillStyle='rgba(255,255,255,0.6)'; ctx.font='11px Inter'; ctx.fillText(d.name.slice(0,8), x, h-2);
+      });
+    }
+
+    /* ======= AI Suggestion Engine (simple rules) ======= */
+    document.getElementById('suggestBtn').addEventListener('click',()=>{
+      const total = totalHours();
+      if(total===0) return alert('Add subjects first');
+      // Suggest distribution: harder and higher hours get more frequent slots across week
+      const suggestions = []; // {day, subject, hours}
+      // calculate weight per subject
+      const weights = state.subjects.map(s=>({...s, weight: s.hours * (1 + (s.diff-1)*0.5)}));
+      // normalize weights
+      const weightSum = weights.reduce((a,b)=>a+b.weight,0);
+      // fill 7 days with up to 4 study slots each
+      const slots = 7*3; // 3 slots/day
+      for(let i=0;i<slots;i++){
+        // pick a subject randomly by weight
+        let r=Math.random()*weightSum; let sel=weights[0];
+        for(const w of weights){ if(r<=w.weight){ sel=w; break;} r-=w.weight; }
+        const day = days[i%7];
+        suggestions.push({day,subject:sel.name,hours: Math.max(1, Math.round(sel.hours/Math.ceil(sel.hours/2)))});
+      }
+      // show summary and option to apply
+      const summary = generateAISummary(suggestions);
+      document.getElementById('aiSuggestions').innerHTML = summary + '<div style="margin-top:8px"><button class="btn" id="applyAi">Apply to Calendar</button></div>';
+      document.getElementById('applyAi').onclick = ()=>{ applyAISuggestions(suggestions); }
+    });
+
+    function generateAISummary(suggestions){
+      // count per day
+      const map={}; suggestions.forEach(s=>{ map[s.day]=(map[s.day]||0)+1; });
+      let html=''; for(const d of days){ html += `<div style="display:flex;justify-content:space-between;margin:4px 0"><div class="muted">${d}</div><div class="chip">${map[d]||0} slots</div></div>`; }
+      return html;
+    }
+    function applyAISuggestions(suggestions){
+      suggestions.forEach(s=>{
+        if(!state.calendar[s.day]) state.calendar[s.day]=[];
+        state.calendar[s.day].push({name:s.subject,hours:s.hours,diff:2});
+      });
+      saveAll(); renderCalendar(); drawCharts(); document.getElementById('aiSuggestions').innerText='Applied!';
+    }
+
+    /* ======= Export / Import ======= */
+    document.getElementById('exportBtn').addEventListener('click',()=> exportJSON());
+    document.getElementById('importBtn').addEventListener('click',()=> document.getElementById('importFile').click());
+    document.getElementById('importFile').addEventListener('change',e=>{
+      const f = e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload = ev=>{ try{ const data=JSON.parse(ev.target.result); if(data.subjects) { state.subjects=data.subjects; state.calendar=data.calendar||{}; saveAll(); renderSubjects(); renderCalendar(); drawCharts(); alert('Imported'); } else alert('Invalid file'); }catch(err){alert('Invalid JSON file');}}; r.readAsText(f);
+    });
+
+    function exportJSON(){
+      const payload = {subjects:state.subjects, calendar:state.calendar, exportedAt:new Date().toISOString()};
+      const blob = new Blob([JSON.stringify(payload, null, 2)],{type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download = 'smart-study-planner.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    }
+
+    /* ======= Local Save/Load ======= */
+    document.getElementById('saveLocal').addEventListener('click',()=>{ saveAll(); alert('Saved locally'); });
+    document.getElementById('loadLocal').addEventListener('click',()=>{ if(confirm('Load saved planner from browser storage?')){ state.subjects = JSON.parse(localStorage.getItem('ss_subjects')||'[]'); state.calendar = JSON.parse(localStorage.getItem('ss_calendar')||'{}'); renderSubjects(); renderCalendar(); drawCharts(); } });
+
+    /* ======= Notifications ======= */
+    document.getElementById('notifyBtn').addEventListener('click', async ()=>{
+      if(!('Notification' in window)) return alert('Notifications not supported');
+      const p = await Notification.requestPermission(); if(p==='granted') alert('Notifications enabled'); else alert('Permission: '+p);
+    });
+    function notify(title, body=''){
+      if(Notification.permission==='granted') new Notification(title,{body});
+    }
+
+    /* ======= Timer / Pomodoro ======= */
+    const timeDisplay = document.getElementById('timeDisplay');
+    const cycleInfo = document.getElementById('cycleInfo');
+    function setTimerFromInputs(){
+      const work = Number(document.getElementById('workMin').value)||25;
+      state.timer.timeLeft = work*60;
+      state.timer.mode='work'; state.timer.cycleCount=0; updateTimeUI();
+    }
+    function updateTimeUI(){
+      const m = Math.floor(state.timer.timeLeft/60); const s = state.timer.timeLeft%60;
+      timeDisplay.innerText = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      cycleInfo.innerText = state.timer.mode.charAt(0).toUpperCase()+state.timer.mode.slice(1);
+    }
+    document.getElementById('startTimer').addEventListener('click',()=>{
+      if(state.timer.running) return;
+      if(state.timer.timeLeft<=0) setTimerFromInputs();
+      state.timer.running=true; state.timer.interval = setInterval(()=>{
+        state.timer.timeLeft--; updateTimeUI();
+        if(state.timer.timeLeft<=0){
+          clearInterval(state.timer.interval); state.timer.running=false; handleTimerFinish();
+        }
+      },1000);
+    });
+    document.getElementById('pauseTimer').addEventListener('click',()=>{ if(state.timer.interval) clearInterval(state.timer.interval); state.timer.running=false; });
+    document.getElementById('resetTimer').addEventListener('click',()=>{ if(state.timer.interval) clearInterval(state.timer.interval); setTimerFromInputs(); state.timer.running=false; });
+
+    function handleTimerFinish(){
+      // cycle logic: work -> short -> work -> short -> work -> long
+      state.timer.cycleCount++;
+      const short = Number(document.getElementById('shortMin').value)||5;
+      const long = Number(document.getElementById('longMin').value)||15;
+      if(state.timer.mode==='work'){
+        // after work: choose short or long
+        if(state.timer.cycleCount % 4 === 0){ state.timer.mode='long'; state.timer.timeLeft = long*60; notify('Long Break','Take a longer break!'); }
+        else { state.timer.mode='short'; state.timer.timeLeft = short*60; notify('Short Break','Take a short break!'); }
+      } else {
+        state.timer.mode='work'; state.timer.timeLeft = (Number(document.getElementById('workMin').value)||25)*60; notify('Work Session','Back to work!');
+      }
+      updateTimeUI();
+      // auto-start next session
+      state.timer.running = true;
+      state.timer.interval = setInterval(()=>{
+        state.timer.timeLeft--; updateTimeUI();
+        if(state.timer.timeLeft<=0){ clearInterval(state.timer.interval); state.timer.running=false; handleTimerFinish(); }
+      },1000);
+    }
+
+    /* ======= Progress bar update ======= */
+    function updateProgressBar(){
+      const total = totalHours(); const cap = 40; const pct = Math.min(100, Math.round((total/cap)*100));
+      document.getElementById('fill').style.width = pct+'%';
+    }
+
+    /* ======= Init ======= */
+    function init(){
+      // ensure calendar has arrays
+      days.forEach(d=>{ if(!state.calendar[d]) state.calendar[d]=state.calendar[d] || []; });
+      renderSubjects(); renderCalendar(); drawCharts(); updateTimeUI();
+      // drag subjects: allow dragging of subject list items already handled
+    }
+
+    init();
+
+    // Helpful keyboard: Enter adds subject
+    document.getElementById('subjectInput').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('addBtn').click(); });
+
+    // small safety: autosave every 10s
+    setInterval(()=>{ saveAll(); },10000);
+
+    // expose for debugging (optional)
+    window.SSP = {state, saveAll, exportJSON};
+  </script>
+</body>
+</html>
