@@ -39,4 +39,5 @@ View total study hours and track improvement.
 ## 📸 Screenshots
 
 ### 🖥 Project Preview  
-*(Add your clean screenshot here)*  
+<img width="1920" height="922" alt="Screenshot (291)" src="https://github.com/user-attachments/assets/7053fc30-b4c7-484d-8716-7548f042cdf7" />
+
